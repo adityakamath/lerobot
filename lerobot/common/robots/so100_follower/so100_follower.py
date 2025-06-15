@@ -19,7 +19,7 @@ import time
 from functools import cached_property
 from typing import Any
 
-from lerobot.common.cameras.utils import make_cameras_from_configs
+from lerobot.common.cameras.utils import make_cameras_from_configs, process_camera_result
 from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 from lerobot.common.motors import Motor, MotorCalibration, MotorNormMode
 from lerobot.common.motors.feetech import (
@@ -30,6 +30,7 @@ from lerobot.common.motors.feetech import (
 from ..robot import Robot
 from ..utils import ensure_safe_goal_position
 from .config_so100_follower import SO100FollowerConfig
+from lerobot.common.robots.utils import add_camera_observations
 
 logger = logging.getLogger(__name__)
 
@@ -66,9 +67,23 @@ class SO100Follower(Robot):
 
     @property
     def _cameras_ft(self) -> dict[str, tuple]:
-        return {
-            cam: (self.config.cameras[cam].height, self.config.cameras[cam].width, 3) for cam in self.cameras
-        }
+        features = {}
+        for cam in self.cameras:
+            h = self.config.cameras[cam].height
+            w = self.config.cameras[cam].width
+            features[cam] = (h, w, 3)
+            # Only add depth feature if use_depth is True in the config
+            cam_cfg = self.config.cameras[cam]
+            if hasattr(cam_cfg, 'use_depth') and getattr(cam_cfg, 'use_depth', False):
+                # Use depth_height/depth_width if available, else fallback to known default
+                dh = getattr(cam_cfg, 'depth_height', None)
+                dw = getattr(cam_cfg, 'depth_width', None)
+                if dh is not None and dw is not None:
+                    features[f"{cam}_depth"] = (dh, dw, 1)
+                else:
+                    # Default for DepthAI mono: 400x640
+                    features[f"{cam}_depth"] = (400, 640, 1)
+        return features
 
     @cached_property
     def observation_features(self) -> dict[str, type | tuple]:
@@ -165,12 +180,8 @@ class SO100Follower(Robot):
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")
 
-        # Capture images from cameras
-        for cam_key, cam in self.cameras.items():
-            start = time.perf_counter()
-            obs_dict[cam_key] = cam.async_read()
-            dt_ms = (time.perf_counter() - start) * 1e3
-            logger.debug(f"{self} read {cam_key}: {dt_ms:.1f}ms")
+        # Capture camera observations
+        add_camera_observations(self, obs_dict)
 
         return obs_dict
 

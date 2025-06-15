@@ -415,11 +415,14 @@ def hw_to_dataset_features(
         }
 
     for key, shape in cam_fts.items():
-        features[f"{prefix}.images.{key}"] = {
+        feature = {
             "dtype": "video" if use_video else "image",
             "shape": shape,
             "names": ["height", "width", "channels"],
         }
+        if key.endswith("_depth"):
+            feature["info"] = {"video.is_depth_map": True}
+        features[f"{prefix}.images.{key}"] = feature
 
     _validate_feature_names(features)
     return features
@@ -435,7 +438,18 @@ def build_dataset_frame(
         elif ft["dtype"] == "float32" and len(ft["shape"]) == 1:
             frame[key] = np.array([values[name] for name in ft["names"]], dtype=np.float32)
         elif ft["dtype"] in ["image", "video"]:
-            frame[key] = values[key.removeprefix(f"{prefix}.images.")]
+            base_key = key.removeprefix(f"{prefix}.images.")
+            if base_key in values:
+                frame[key] = values[base_key]
+            elif base_key + "_color" in values:
+                frame[key] = values[base_key + "_color"]
+            else:
+                raise KeyError(f"Neither '{base_key}' nor '{base_key}_color' found in observation for dataset feature '{key}'")
+            # Always add depth image if available
+            depth_key = base_key + "_depth"
+            depth_feature_key = f"{prefix}.images.{depth_key}"
+            if depth_key in values and depth_feature_key not in frame:
+                frame[depth_feature_key] = values[depth_key]
 
     return frame
 

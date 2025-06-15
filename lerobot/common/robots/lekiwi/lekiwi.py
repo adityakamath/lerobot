@@ -22,7 +22,7 @@ from typing import Any
 
 import numpy as np
 
-from lerobot.common.cameras.utils import make_cameras_from_configs
+from lerobot.common.cameras.utils import make_cameras_from_configs, process_camera_result
 from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 from lerobot.common.motors import Motor, MotorCalibration, MotorNormMode
 from lerobot.common.motors.feetech import (
@@ -249,11 +249,11 @@ class LeKiwi(Robot):
 
         # Define the wheel mounting angles with a -90° offset.
         angles = np.radians(np.array([240, 0, 120]) - 90)
-        # Build the kinematic matrix: each row maps body velocities to a wheel’s linear speed.
+        # Build the kinematic matrix: each row maps body velocities to a wheel's linear speed.
         # The third column (base_radius) accounts for the effect of rotation.
         m = np.array([[np.cos(a), np.sin(a), base_radius] for a in angles])
 
-        # Compute each wheel’s linear speed (m/s) and then its angular speed (rad/s).
+        # Compute each wheel's linear speed (m/s) and then its angular speed (rad/s).
         wheel_linear_speeds = m.dot(velocity_vector)
         wheel_angular_speeds = wheel_linear_speeds / wheel_radius
 
@@ -268,7 +268,7 @@ class LeKiwi(Robot):
             scale = max_raw / max_raw_computed
             wheel_degps = wheel_degps * scale
 
-        # Convert each wheel’s angular speed (deg/s) to a raw integer.
+        # Convert each wheel's angular speed (deg/s) to a raw integer.
         wheel_raw = [self._degps_to_raw(deg) for deg in wheel_degps]
 
         return {
@@ -308,7 +308,7 @@ class LeKiwi(Robot):
 
         # Convert from deg/s to rad/s.
         wheel_radps = wheel_degps * (np.pi / 180.0)
-        # Compute each wheel’s linear speed (m/s) from its angular speed.
+        # Compute each wheel's linear speed (m/s) from its angular speed.
         wheel_linear_speeds = wheel_radps * wheel_radius
 
         # Define the wheel mounting angles with a -90° offset.
@@ -348,10 +348,11 @@ class LeKiwi(Robot):
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")
 
-        # Capture images from cameras
+        # Capture images from cameras (DRY, robust)
         for cam_key, cam in self.cameras.items():
             start = time.perf_counter()
-            obs_dict[cam_key] = cam.async_read()
+            result = cam.async_read()
+            process_camera_result(cam_key, result, obs_dict)
             dt_ms = (time.perf_counter() - start) * 1e3
             logger.debug(f"{self} read {cam_key}: {dt_ms:.1f}ms")
 

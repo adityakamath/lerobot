@@ -29,6 +29,7 @@ from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnecte
 
 from ..robot import Robot
 from .config_lekiwi import LeKiwiClientConfig
+from lerobot.common.cameras.utils import process_camera_result
 
 
 class LeKiwiClient(Robot):
@@ -262,12 +263,9 @@ class LeKiwiClient(Robot):
 
         frames, obs_dict = self._get_data()
 
-        # Loop over each configured camera
+        # Handle color/depth tuple and channel expansion
         for cam_name, frame in frames.items():
-            if frame is None:
-                logging.warning("Frame is None")
-                frame = np.zeros((640, 480, 3), dtype=np.uint8)
-            obs_dict[cam_name] = torch.from_numpy(frame)
+            process_camera_result(cam_name, frame, obs_dict)
 
         return obs_dict
 

@@ -21,7 +21,7 @@ from stretch_body.gamepad_teleop import GamePadTeleop
 from stretch_body.robot import Robot as StretchAPI
 from stretch_body.robot_params import RobotParams
 
-from lerobot.common.cameras.utils import make_cameras_from_configs
+from lerobot.common.cameras.utils import make_cameras_from_configs, process_camera_result
 from lerobot.common.constants import OBS_IMAGES, OBS_STATE
 from lerobot.common.datasets.utils import get_nested_item
 
@@ -136,7 +136,8 @@ class Stretch3Robot(Robot):
         # Capture images from cameras
         for cam_key, cam in self.cameras.items():
             before_camread_t = time.perf_counter()
-            obs_dict[f"{OBS_IMAGES}.{cam_key}"] = cam.async_read()
+            result = cam.async_read()
+            process_camera_result(f"{OBS_IMAGES}.{cam_key}", result, obs_dict)
             self.logs[f"read_camera_{cam_key}_dt_s"] = cam.logs["delta_timestamp_s"]
             self.logs[f"async_read_camera_{cam_key}_dt_s"] = time.perf_counter() - before_camread_t
 

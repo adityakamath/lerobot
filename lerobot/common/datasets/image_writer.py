@@ -40,16 +40,30 @@ def safe_stop_image_writer(func):
 
 def image_array_to_pil_image(image_array: np.ndarray, range_check: bool = True) -> PIL.Image.Image:
     # TODO(aliberts): handle 1 channel and 4 for depth images
-    if image_array.ndim != 3:
-        raise ValueError(f"The array has {image_array.ndim} dimensions, but 3 is expected for an image.")
-
-    if image_array.shape[0] == 3:
+    # Accept (H, W, 3) or (H, W, 1) or (H, W)
+    if image_array.ndim == 3 and image_array.shape[0] == 3:
         # Transpose from pytorch convention (C, H, W) to (H, W, C)
         image_array = image_array.transpose(1, 2, 0)
 
-    elif image_array.shape[-1] != 3:
+    if image_array.ndim == 3 and image_array.shape[-1] == 1:
+        # Try to save as grayscale (H, W)
+        image_array = image_array.squeeze(-1)
+        try:
+            return PIL.Image.fromarray(image_array)
+        except Exception:
+            # If not accepted, repeat to 3 channels
+            image_array = np.repeat(image_array[..., None], 3, axis=2)
+            return PIL.Image.fromarray(image_array)
+
+    if image_array.ndim == 2:
+        # Already grayscale
+        return PIL.Image.fromarray(image_array)
+
+    if image_array.ndim == 3 and image_array.shape[-1] == 3:
+        pass  # Standard RGB
+    else:
         raise NotImplementedError(
-            f"The image has {image_array.shape[-1]} channels, but 3 is required for now."
+            f"The image has {image_array.shape[-1]} channels, but only 1 or 3 are supported."
         )
 
     if image_array.dtype != np.uint8:

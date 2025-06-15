@@ -37,8 +37,14 @@ def make_cameras_from_configs(camera_configs: dict[str, CameraConfig]) -> dict[s
             from .realsense.camera_realsense import RealSenseCamera
 
             cameras[key] = RealSenseCamera(cfg)
+
+        elif cfg.type == "depthai":
+            from .depthai.camera_depthai import DepthAICamera
+
+            cameras[key] = DepthAICamera(cfg)
+
         else:
-            raise ValueError(f"The motor type '{cfg.type}' is not valid.")
+            raise ValueError(f"The camera type '{cfg.type}' is not valid.")
 
     return cameras
 
@@ -63,3 +69,21 @@ def get_cv2_backend() -> int:
         return cv2.CAP_AVFOUNDATION
     else:
         return cv2.CAP_ANY
+
+
+def ensure_depth_has_channel(depth):
+    """Expand 2D depth array to (H, W, 1) if needed."""
+    if depth is not None and getattr(depth, 'ndim', 0) == 2:
+        return depth[..., None]
+    return depth
+
+
+def process_camera_result(cam_key, result, obs_dict):
+    """Process camera result and add to obs_dict, handling color/depth tuple and channel expansion."""
+    if isinstance(result, tuple) and len(result) == 2:
+        color, depth = result
+        depth = ensure_depth_has_channel(depth)
+        obs_dict[f"{cam_key}_color"] = color
+        obs_dict[f"{cam_key}_depth"] = depth
+    else:
+        obs_dict[cam_key] = result

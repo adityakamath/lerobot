@@ -93,3 +93,14 @@ def ensure_safe_goal_position(
         )
 
     return safe_goal_positions
+
+
+def add_camera_observations(robot, obs_dict):
+    """
+    DRY utility for all robots: loops through robot.cameras, calls async_read, and uses process_camera_result to populate obs_dict.
+    Usage: add_camera_observations(self, obs_dict) in get_observation.
+    """
+    from lerobot.common.cameras.utils import process_camera_result
+    for cam_key, cam in robot.cameras.items():
+        result = cam.async_read()
+        process_camera_result(cam_key, result, obs_dict)

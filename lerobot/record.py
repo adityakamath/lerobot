@@ -49,6 +49,7 @@ from lerobot.common.cameras import (  # noqa: F401
 )
 from lerobot.common.cameras.opencv.configuration_opencv import OpenCVCameraConfig  # noqa: F401
 from lerobot.common.cameras.realsense.configuration_realsense import RealSenseCameraConfig  # noqa: F401
+from lerobot.common.cameras.depthai.configuration_depthai import DepthAICameraConfig  # noqa: F401
 from lerobot.common.datasets.image_writer import safe_stop_image_writer
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.common.datasets.utils import build_dataset_frame, hw_to_dataset_features
@@ -223,12 +224,12 @@ def record_loop(
         if display_data:
             for obs, val in observation.items():
                 if isinstance(val, float):
-                    rr.log(f"observation.{obs}", rr.Scalar(val))
+                    rr.log(f"observation.{obs}", rr.Scalars(val))
                 elif isinstance(val, np.ndarray):
                     rr.log(f"observation.{obs}", rr.Image(val), static=True)
             for act, val in action.items():
                 if isinstance(val, float):
-                    rr.log(f"action.{act}", rr.Scalar(val))
+                    rr.log(f"action.{act}", rr.Scalars(val))
 
         dt_s = time.perf_counter() - start_loop_t
         busy_wait(1 / fps - dt_s)
