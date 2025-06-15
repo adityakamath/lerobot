@@ -38,12 +38,12 @@ import numpy as np
 from PIL import Image
 
 from lerobot.common.cameras.configs import ColorMode
+from lerobot.common.cameras.depthai.camera_depthai import DepthAICamera
+from lerobot.common.cameras.depthai.configuration_depthai import DepthAICameraConfig
 from lerobot.common.cameras.opencv.camera_opencv import OpenCVCamera
 from lerobot.common.cameras.opencv.configuration_opencv import OpenCVCameraConfig
 from lerobot.common.cameras.realsense.camera_realsense import RealSenseCamera
 from lerobot.common.cameras.realsense.configuration_realsense import RealSenseCameraConfig
-from lerobot.common.cameras.depthai.camera_depthai import DepthAICamera
-from lerobot.common.cameras.depthai.configuration_depthai import DepthAICameraConfig
 
 logger = logging.getLogger(__name__)
 

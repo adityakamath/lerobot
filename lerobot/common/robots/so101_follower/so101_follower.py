@@ -26,11 +26,11 @@ from lerobot.common.motors.feetech import (
     FeetechMotorsBus,
     OperatingMode,
 )
+from lerobot.common.robots.utils import add_camera_observations
 
 from ..robot import Robot
 from ..utils import ensure_safe_goal_position
 from .config_so101_follower import SO101FollowerConfig
-from lerobot.common.robots.utils import add_camera_observations
 
 logger = logging.getLogger(__name__)
 

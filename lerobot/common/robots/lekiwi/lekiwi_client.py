@@ -22,14 +22,13 @@ from typing import Any, Dict, Optional, Tuple
 
 import cv2
 import numpy as np
-import torch
 import zmq
 
+from lerobot.common.cameras.utils import process_camera_result
 from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 
 from ..robot import Robot
 from .config_lekiwi import LeKiwiClientConfig
-from lerobot.common.cameras.utils import process_camera_result
 
 
 class LeKiwiClient(Robot):

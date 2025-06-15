@@ -31,9 +31,9 @@ from pprint import pformat
 
 import draccus
 
+from lerobot.common.cameras.depthai.configuration_depthai import DepthAICameraConfig  # noqa: F401
 from lerobot.common.cameras.opencv.configuration_opencv import OpenCVCameraConfig  # noqa: F401
 from lerobot.common.cameras.realsense.configuration_realsense import RealSenseCameraConfig  # noqa: F401
-from lerobot.common.cameras.depthai.configuration_depthai import DepthAICameraConfig  # noqa: F401
 from lerobot.common.robots import (  # noqa: F401
     Robot,
     RobotConfig,

@@ -19,18 +19,18 @@ import time
 from functools import cached_property
 from typing import Any
 
-from lerobot.common.cameras.utils import make_cameras_from_configs, process_camera_result
+from lerobot.common.cameras.utils import make_cameras_from_configs
 from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 from lerobot.common.motors import Motor, MotorCalibration, MotorNormMode
 from lerobot.common.motors.dynamixel import (
     DynamixelMotorsBus,
     OperatingMode,
 )
+from lerobot.common.robots.utils import add_camera_observations
 
 from ..robot import Robot
 from ..utils import ensure_safe_goal_position
 from .config_koch_follower import KochFollowerConfig
-from lerobot.common.robots.utils import add_camera_observations
 
 logger = logging.getLogger(__name__)
 

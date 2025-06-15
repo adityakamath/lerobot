@@ -14,7 +14,9 @@
 
 from dataclasses import dataclass, field
 from typing import Any
+
 from ..configs import CameraConfig, ColorMode, Cv2Rotation
+
 
 @CameraConfig.register_subclass("depthai")
 @dataclass

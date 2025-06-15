@@ -25,11 +25,11 @@ from lerobot.common.motors.dynamixel import (
     DynamixelMotorsBus,
     OperatingMode,
 )
+from lerobot.common.robots.utils import add_camera_observations
 
 from ..robot import Robot
 from ..utils import ensure_safe_goal_position
 from .config_viperx import ViperXConfig
-from lerobot.common.robots.utils import add_camera_observations
 
 logger = logging.getLogger(__name__)
 

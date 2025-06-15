@@ -16,23 +16,26 @@
 Provides the DepthAICamera class for capturing frames from Luxonis OAK cameras using DepthAI.
 """
 
+import contextlib
 import logging
 import time
 from threading import Event, Lock, Thread
 from typing import Any, Dict, List, Optional
-import numpy as np
+
 import cv2
+import numpy as np
 
 try:
     import depthai as dai
 except Exception as e:
     logging.info(f"Could not import depthai: {e}")
 
+from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
+
 from ..camera import Camera
 from ..configs import ColorMode
 from ..utils import get_cv2_rotation
 from .configuration_depthai import DepthAICameraConfig
-from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 
 logger = logging.getLogger(__name__)
 
@@ -333,10 +336,8 @@ class DepthAICamera(Camera):
             return frame
 
     def __del__(self):
-        try:
+        with contextlib.suppress(Exception):
             self.disconnect()
-        except Exception:
-            pass
 
     def disconnect(self):
         if not self.is_connected and self.thread is None:
