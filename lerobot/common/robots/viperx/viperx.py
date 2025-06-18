@@ -17,7 +17,7 @@ import time
 from functools import cached_property
 from typing import Any
 
-from lerobot.common.cameras.utils import make_cameras_from_configs, process_camera_result
+from lerobot.common.cameras.utils import make_cameras_from_configs
 from lerobot.common.constants import OBS_STATE
 from lerobot.common.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 from lerobot.common.motors import Motor, MotorCalibration, MotorNormMode
