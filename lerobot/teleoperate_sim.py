@@ -5,7 +5,7 @@ No physical robot is connected or commanded. Use this to control a robot in simu
 
 Example usage:
 
-python -m lerobot.teleoperate_sim \
+mjpython -m lerobot.teleoperate_sim \
   --teleop.type=so100_leader \
   --teleop.port=/dev/tty.usbmodemXXXX \
   --teleop.id=my_leader \
